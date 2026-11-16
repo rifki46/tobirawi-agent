@@ -1,9 +1,14 @@
 "use strict";
 /** Vercel entrypoint — register this full path (/agent) as the endpoint. */
-const { handlePost, SIGNATURE_HEADER } = require("../lib/core");
+const { handlePost, warmup, SIGNATURE_HEADER } = require("../lib/core");
+
+// Start downloading the circuit artifacts at cold start so the first
+// scored task does not pay the fetch cost inside its response window.
+warmup();
 
 module.exports = async (req, res) => {
   if (req.method === "GET") {
+    warmup();
     res.status(200).json({ ok: true, protocolVersion: "v1" });
     return;
   }
